@@ -28,8 +28,8 @@ export class SystemGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async handleGetRamUsage(@MessageBody() data: any, client: Socket): Promise<void> {
     try {
       const memData = await si.mem();
-      this.logger.log(`RAM usage: ${memData.active} / ${memData.total}`);
-      this.server.emit('ram-usage', { used: memData.active, total: memData.total });
+      this.logger.log(`RAM usage: ${memData.active} / ${memData.free}`);
+      this.server.emit('ram-usage', { used: memData.active, free: memData.free });
     } catch (error) {
       this.logger.error('Error fetching RAM data:', error);
     }
