@@ -1,49 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import io from 'socket.io-client';
+import { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 
-const socket = io('http://localhost:3000');
+const socket = new WebSocket('ws://localhost:8080');
 
 const RamUsageChart = () => {
-    const [isConnected, setIsConnected] = useState(socket.connected);
+    const [isConnected, setIsConnected] = useState(false);
     const [ramData, setRamData] = useState({ used: 0, free: 0 });
     const [chartData, setChartData] = useState<{used: number, free: number}[]>([]);
     const [totalMemory, setTotalMemory] = useState(null);
 
     useEffect(() => {
         // Fetch total memory once on component mount
-        fetch('http://localhost:3000/total',)
+        fetch('http://localhost:8080/total',)
             .then(response => response.json())
             .then(data => setTotalMemory(data.total))
             .catch(error => console.error('Error fetching total memory:', error));
     }, []);
 
     useEffect(() => {
-      socket.on('connect', () => {
+      socket.onopen = () => {
         console.log('Socket connection established');
         setIsConnected(true);
 
-        const interval = setInterval(() => {
-            socket.emit('get-ram-usage');
+        setInterval(() => { 
+            socket.send(JSON.stringify({ event: 'get-ram-usage' }));
         }, 1000);
+    };
 
-        socket.on('disconnect', () => {
-            clearInterval(interval);
-            console.log('Socket connection closed');
-        });
-    });
+    socket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        if (message.event === 'ram-usage') {
+            setRamData(message.data);
+        }
+    };
 
-    socket.on('ram-usage', (data) => {
-        setRamData(data);
-    });
-
-    socket.on('error', (error) => {
-        console.error('Socket error:', error);
-    });
-
-    // return () => {
-    //     socket.close();
-    // };
+    socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
     }, []);
 
     useEffect(() => {
