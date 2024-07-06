@@ -49,7 +49,7 @@ wss.on('connection', (ws) => {
   const sendRamUsage = async () => {
     try {
       const memData = await si.mem();
-      ws.send(JSON.stringify({ event: 'ram-usage', data: { used: memData.active, free: memData.free } }));
+      ws.send(JSON.stringify({ event: 'ram-usage', data: { used: (memData.active / (1024 ** 3)).toFixed(3), free: (memData.free / (1024 ** 3)).toFixed(3) } }));
     } catch (error) {
       console.error('Error fetching RAM data:', error);
     }
