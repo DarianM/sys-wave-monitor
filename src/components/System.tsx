@@ -24,6 +24,7 @@ const RamUsageChart = () => {
       socket.onopen = () => {
         console.log('Socket connection established');
         setIsConnected(true);
+        console.log(isConnected);
 
         setInterval(() => { 
             socket.send(JSON.stringify({ event: 'get-ram-usage' }));
