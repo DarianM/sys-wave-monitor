@@ -15,14 +15,16 @@ app.use(cors(corsOptions));
 
 // sample api routes for testing 
 app.get('/',(req, res) => { 
-  res.json("hello") 
+  res.json("working") 
 });
 
 // Route to get total RAM memory
 app.get('/total', async (req, res) => {
   try {
-    const memData = await si.mem();
-    res.json({ total: memData.total });
+    const { total } = await si.mem();
+    const totalMem = (total / (1024 ** 3)).toFixed(2)
+    app.locals.totalMem = totalMem;
+    res.json({ totalMem });
   } catch (error) {
     console.error('Error fetching total RAM data:', error);
     res.status(500).send('Internal Server Error');
@@ -55,10 +57,22 @@ wss.on('connection', (ws) => {
     }
   };
 
+  const sendProcesses = async () => {
+    const test = await si.processes();
+    // Sort processes by memory usage
+    const running = test.list.sort((a, b) => b.mem - a.mem).slice(0, 50);
+
+    const data = running.map(s => ({ name: s.name, mem: (((app.locals.totalMem * s.mem) / 100) * 1024).toFixed(2), pid: s.pid })); // Convert memRss from kilobytes to MB
+    ws.send(JSON.stringify({ event: 'processes', data }));
+  };
+
   ws.on('message', async (message) => {
     const parsedMessage = JSON.parse(message.toString());
     if (parsedMessage.event === 'get-ram-usage') {
       sendRamUsage();
+    }
+    if (parsedMessage.event === 'get-processes') {
+      sendProcesses();
     }
   });
 

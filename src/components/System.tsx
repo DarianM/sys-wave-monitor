@@ -1,43 +1,55 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import moment from 'moment';
 import ReactECharts from 'echarts-for-react';
-import * as echarts from "echarts";
+import * as echarts from 'echarts';
+import { MessageData } from '../interfaces/types';
+import './System.css';
 
 const socket = new WebSocket('ws://localhost:8080');
 
 const RamUsageChart = () => {
-    const [isConnected, setIsConnected] = useState(false);
+    const [processes, setProcesses] = useState<{ name: string, mem: number, pid: number}[]>([]);
     const [ramData, setRamData] = useState<{used: number, free: number, time: string}[]>([]);
     const [chartData, setChartData] = useState<{used: number, free: number, time: string}[]>([]);
     const [totalMemory, setTotalMemory] = useState(null);
     const [timeRange, setTimeRange] = useState(60); // Default to last 60 seconds
 
+    const [memory, dispatch] = useReducer((state, action) => {
+        switch (action.type) {
+            case 'SORT_BY':
+                return { ...state, sortBy: action.payload, sortOrder: action.payload === state.sortBy && state.sortOrder === 'asc' ? 'desc' : 'asc' };
+        }
+        return state;
+    }, { sortBy: 'mem', sortOrder: 'desc' });
+
     useEffect(() => {
         // Fetch total memory once on component mount
         fetch('http://localhost:8080/total',)
             .then(response => response.json())
-            .then(data => setTotalMemory(data.total))
+            .then(data => setTotalMemory(data.totalMem))
             .catch(error => console.error('Error fetching total memory:', error));
     }, []);
 
     useEffect(() => {
       socket.onopen = () => {
         console.log('Socket connection established');
-        setIsConnected(true);
-        console.log(isConnected);
 
         setInterval(() => { 
             socket.send(JSON.stringify({ event: 'get-ram-usage' }));
+            socket.send(JSON.stringify({ event: 'get-processes' }));
         }, 1000);
     };
 
     socket.onmessage = (event) => {
-        const message = JSON.parse(event.data);
+        const message: MessageData = JSON.parse(event.data);
         if (message.event === 'ram-usage') {
             setRamData((prevData) => {
                 const { used, free } = message.data;
                 return [ ...prevData, { used, free, time: new Date().toISOString() }];
-         });
+            });
+        }
+        if (message.event === 'processes') {
+            setProcesses(message.data);
         }
     };
 
@@ -53,7 +65,7 @@ const RamUsageChart = () => {
     const option = {
         color: ['#00DDFF', '#80FFA5'],
         title: {
-            text: 'Live RAM Usage',
+            text: 'RAM Usage',
         },
         tooltip: {
             trigger: 'axis',
@@ -65,14 +77,14 @@ const RamUsageChart = () => {
               }
         },
         legend: {
-            data: ['Used RAM', 'Free RAM'],
+            data: ['In use', 'Available'],
         },
         xAxis: {
             type: 'time',
             boundaryGap: false,
             axisLabel: {
                 formatter: (function(value: number){ //timestamp
-                    return moment(value).format('mm\`ss\`\`');
+                    return moment(value).format('hh:mm:ss');
                 })
             }
         },
@@ -84,7 +96,7 @@ const RamUsageChart = () => {
         },
         series: [
             {
-                name: 'Used RAM',
+                name: 'In use',
                 type: 'line',
                 smooth: true,
                 lineStyle: {
@@ -109,7 +121,7 @@ const RamUsageChart = () => {
                 data: chartData.map((data) => [data.time, data.used]),
             },
             {
-                name: 'Free RAM',
+                name: 'Available',
                 type: 'line',
                 smooth: true,
                 lineStyle: {
@@ -136,11 +148,12 @@ const RamUsageChart = () => {
         ],
     };
 
+    console.log(memory);
     return (
         <div>
             {totalMemory !== null && (
                 <div>
-                    <h3>Total Memory: {(totalMemory / (1024 ** 3)).toFixed(2)} GB</h3>
+                    <h3>Total Memory: {totalMemory} GB</h3>
                 </div>
             )}
             <div>
@@ -149,6 +162,28 @@ const RamUsageChart = () => {
                 <button onClick={() => setTimeRange(Infinity)}>Total</button>
             </div>
             <ReactECharts option={option} />
+
+            {/* Add a table to display processes */}
+            {processes.length > 0 && (
+                <div>
+                    <h3>Running Processes top50</h3>
+                    <div className="table">
+                        <div className="row heading">
+                            <div className="cell" onClick={() => dispatch({ type: 'SORT_BY', payload: 'name' })}>Process Name</div>
+                            <div className="cell" onClick={() => dispatch({ type: 'SORT_BY', payload: 'mem' })}>Memory Usage (MB)</div>
+                        </div>
+                        {processes.map(process => (
+                            <>
+                                <div key = {process.pid} className="row">
+                                    <div className="cell">{process.name}</div>
+                                    <div className="cell">{process.mem}</div>
+                                </div>
+                            </>
+                        ))}
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

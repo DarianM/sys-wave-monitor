@@ -1,0 +1,26 @@
+.table {
+    display: flex;
+    flex-flow: column nowrap;
+    border: 1px solid rgb(224, 220, 220);
+  }
+  
+  .row {
+    display: flex;
+    border-bottom: 1px solid rgb(163, 163, 163);
+    padding: 4px;
+  }
+  
+  .heading {
+    font-weight: bold;
+  }
+  
+  .cell {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+  }
+
+  html {
+    overflow-y: scroll;
+  }
