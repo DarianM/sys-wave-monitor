@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useCallback, useEffect, useReducer, useState } from 'react';
 import moment from 'moment';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
@@ -12,14 +12,15 @@ const RamUsageChart = () => {
     const [ramData, setRamData] = useState<{used: number, free: number, time: string}[]>([]);
     const [chartData, setChartData] = useState<{used: number, free: number, time: string}[]>([]);
     const [totalMemory, setTotalMemory] = useState(null);
-    const [timeRange, setTimeRange] = useState(60); // Default to last 60 seconds
+    const [timeRange, setTimeRange] = useState(60); // default to last 60 seconds
 
     const [memory, dispatch] = useReducer((state, action) => {
         switch (action.type) {
             case 'SORT_BY':
                 return { ...state, sortBy: action.payload, sortOrder: action.payload === state.sortBy && state.sortOrder === 'asc' ? 'desc' : 'asc' };
+            default:
+                return state;
         }
-        return state;
     }, { sortBy: 'mem', sortOrder: 'desc' });
 
     useEffect(() => {
@@ -148,7 +149,22 @@ const RamUsageChart = () => {
         ],
     };
 
-    console.log(memory);
+    const sorting = useCallback((processes: { name: string, mem: number, pid: number}[]) => {
+        if(memory.sortBy === 'mem') {
+            if (memory.sortOrder === 'asc') {
+                return [...processes.sort((a, b) => a.mem - b.mem)];
+            } else {
+                return [...processes.sort((a, b) => b.mem - a.mem)];
+            }
+        } else {
+            if (memory.sortOrder === 'asc') {
+               return [...processes.sort((a, b) => a.name.localeCompare(b.name))];
+            } else {
+               return [...processes.sort((a, b) => b.name.localeCompare(a.name))];
+            }
+        }
+    }, [memory.sortBy, memory.sortOrder]);
+
     return (
         <div>
             {totalMemory !== null && (
@@ -172,7 +188,7 @@ const RamUsageChart = () => {
                             <div className="cell" onClick={() => dispatch({ type: 'SORT_BY', payload: 'name' })}>Process Name</div>
                             <div className="cell" onClick={() => dispatch({ type: 'SORT_BY', payload: 'mem' })}>Memory Usage (MB)</div>
                         </div>
-                        {processes.map(process => (
+                        {sorting(processes).map(process => (
                             <>
                                 <div key = {process.pid} className="row">
                                     <div className="cell">{process.name}</div>
