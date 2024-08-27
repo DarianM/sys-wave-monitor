@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useReducer, useState } from 'react';
-import moment from 'moment';
+import FilterBar from './FilterBar';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
+import moment from 'moment';
 import { MessageData } from '../interfaces/types';
 import './System.css';
 
@@ -13,8 +14,7 @@ const RamUsageChart = () => {
     const [chartData, setChartData] = useState<{used: number, free: number, time: string}[]>([]);
     const [totalMemory, setTotalMemory] = useState(null);
     const [timeRange, setTimeRange] = useState(60); // default to last 60 seconds
-    const [searchProcess, setSearchProcess] = useState('');
-    // const searchProcessRef = useRef('');
+    const [query, setQueryProcesses] = useState('');
 
     const [memory, dispatch] = useReducer((state, action) => {
         switch (action.type) {
@@ -96,7 +96,7 @@ const RamUsageChart = () => {
             boundaryGap: false,
             axisLabel: {
                 formatter: (function(value: number){ //timestamp
-                    return moment(value).format('hh:mm:ss');
+                    return moment(value).format('HH:mm:ss');
                 })
             }
         },
@@ -177,13 +177,8 @@ const RamUsageChart = () => {
     }, [memory.sortBy, memory.sortOrder]);
 
     const filter = useCallback((processes: { name: string, mem: number, pid: number}[]) => {
-        return processes.filter(process => process.name.toLowerCase().includes(searchProcess.toLowerCase()));
-    }, [searchProcess]);
-
-    const handleInputChange = (e) => { 
-        const searchTerm = e.target.value;
-        setSearchProcess(searchTerm);
-      }
+        return processes.filter(process => process.name.toLowerCase().includes(query.toLowerCase()));
+    }, [query]);
 
     return (
         <div>
@@ -204,14 +199,7 @@ const RamUsageChart = () => {
             {processes.length > 0 && (
                 <div>
                     <h3>Running Processes top50</h3>
-                    <div>      
-                        <input
-                            type="text"
-                            value={searchProcess}
-                            onChange={handleInputChange}
-                            placeholder='Type to search'
-                        />
-                    </div>
+                    <FilterBar query={query} setQuery={setQueryProcesses}/>
                     <div className="table">
                         <div className="row heading">
                             <div className="cell" onClick={() => dispatch({ type: 'SORT_BY', payload: 'name' })}>Process Name</div>

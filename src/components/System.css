@@ -24,3 +24,7 @@
   html {
     overflow-y: scroll;
   }
+
+  input:focus {
+    outline: none;
+  }
