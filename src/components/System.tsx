@@ -13,6 +13,8 @@ const RamUsageChart = () => {
     const [chartData, setChartData] = useState<{used: number, free: number, time: string}[]>([]);
     const [totalMemory, setTotalMemory] = useState(null);
     const [timeRange, setTimeRange] = useState(60); // default to last 60 seconds
+    const [searchProcess, setSearchProcess] = useState('');
+    // const searchProcessRef = useRef('');
 
     const [memory, dispatch] = useReducer((state, action) => {
         switch (action.type) {
@@ -41,6 +43,14 @@ const RamUsageChart = () => {
         }, 1000);
     };
 
+    // useEffect(() => {
+    //     const filteredProcesses = processes.filter(process =>
+    //       process.name.toLowerCase().includes(searchProcess.toLowerCase())
+    //     );
+    //     searchProcessRef.current = searchProcess;
+    //     setProcesses(filteredProcesses);
+    //   }, [searchProcess]);
+
     socket.onmessage = (event) => {
         const message: MessageData = JSON.parse(event.data);
         if (message.event === 'ram-usage') {
@@ -50,6 +60,7 @@ const RamUsageChart = () => {
             });
         }
         if (message.event === 'processes') {
+            // responsable only with setting processes
             setProcesses(message.data);
         }
     };
@@ -165,6 +176,15 @@ const RamUsageChart = () => {
         }
     }, [memory.sortBy, memory.sortOrder]);
 
+    const filter = useCallback((processes: { name: string, mem: number, pid: number}[]) => {
+        return processes.filter(process => process.name.toLowerCase().includes(searchProcess.toLowerCase()));
+    }, [searchProcess]);
+
+    const handleInputChange = (e) => { 
+        const searchTerm = e.target.value;
+        setSearchProcess(searchTerm);
+      }
+
     return (
         <div>
             {totalMemory !== null && (
@@ -179,16 +199,25 @@ const RamUsageChart = () => {
             </div>
             <ReactECharts option={option} />
 
+
             {/* Add a table to display processes */}
             {processes.length > 0 && (
                 <div>
                     <h3>Running Processes top50</h3>
+                    <div>      
+                        <input
+                            type="text"
+                            value={searchProcess}
+                            onChange={handleInputChange}
+                            placeholder='Type to search'
+                        />
+                    </div>
                     <div className="table">
                         <div className="row heading">
                             <div className="cell" onClick={() => dispatch({ type: 'SORT_BY', payload: 'name' })}>Process Name</div>
                             <div className="cell" onClick={() => dispatch({ type: 'SORT_BY', payload: 'mem' })}>Memory Usage (MB)</div>
                         </div>
-                        {sorting(processes).map(process => (
+                        {filter(sorting(processes)).map(process => (
                             <>
                                 <div key = {process.pid} className="row">
                                     <div className="cell">{process.name}</div>
