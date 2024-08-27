@@ -34,5 +34,5 @@ const FilterBar  = ({query, setQuery}) => {
         />
       </div>
     );
-  }
+}
 export default FilterBar;

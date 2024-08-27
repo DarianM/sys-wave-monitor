@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useReducer, useState } from 'react';
+import Header from './Header';
 import FilterBar from './FilterBar';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
@@ -12,7 +13,6 @@ const RamUsageChart = () => {
     const [processes, setProcesses] = useState<{ name: string, mem: number, pid: number}[]>([]);
     const [ramData, setRamData] = useState<{used: number, free: number, time: string}[]>([]);
     const [chartData, setChartData] = useState<{used: number, free: number, time: string}[]>([]);
-    const [totalMemory, setTotalMemory] = useState(null);
     const [timeRange, setTimeRange] = useState(60); // default to last 60 seconds
     const [query, setQueryProcesses] = useState('');
 
@@ -26,14 +26,6 @@ const RamUsageChart = () => {
     }, { sortBy: 'mem', sortOrder: 'desc' });
 
     useEffect(() => {
-        // Fetch total memory once on component mount
-        fetch('http://localhost:8080/total',)
-            .then(response => response.json())
-            .then(data => setTotalMemory(data.totalMem))
-            .catch(error => console.error('Error fetching total memory:', error));
-    }, []);
-
-    useEffect(() => {
       socket.onopen = () => {
         console.log('Socket connection established');
 
@@ -42,14 +34,6 @@ const RamUsageChart = () => {
             socket.send(JSON.stringify({ event: 'get-processes' }));
         }, 1000);
     };
-
-    // useEffect(() => {
-    //     const filteredProcesses = processes.filter(process =>
-    //       process.name.toLowerCase().includes(searchProcess.toLowerCase())
-    //     );
-    //     searchProcessRef.current = searchProcess;
-    //     setProcesses(filteredProcesses);
-    //   }, [searchProcess]);
 
     socket.onmessage = (event) => {
         const message: MessageData = JSON.parse(event.data);
@@ -182,11 +166,7 @@ const RamUsageChart = () => {
 
     return (
         <div>
-            {totalMemory !== null && (
-                <div>
-                    <h3>Total Memory: {totalMemory} GB</h3>
-                </div>
-            )}
+            <Header />
             <div>
                 <button onClick={() => setTimeRange(60)}>Last 60 seconds</button>
                 <button onClick={() => setTimeRange(300)}>Last 300 seconds</button>
