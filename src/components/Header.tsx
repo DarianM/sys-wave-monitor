@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import useFetch from '../hooks/useFetch/useFetch';
 
 const Header = () => {
@@ -15,4 +16,4 @@ const Header = () => {
         </>
     )
 }
-export default Header;
+export default memo(Header);

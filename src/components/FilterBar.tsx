@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import searchLogo from '../assets/search-svgrepo-com.svg';
 
 const FilterBar  = ({query, setQuery}) => {
@@ -35,4 +36,4 @@ const FilterBar  = ({query, setQuery}) => {
       </div>
     );
 }
-export default FilterBar;
+export default memo(FilterBar);
