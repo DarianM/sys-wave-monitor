@@ -1,39 +1,11 @@
-import express from 'express';
-import { WebSocketServer } from 'ws';
-import cors from 'cors';
-import http from 'http';
-import * as si from 'systeminformation';
+const http = require('http');
+const { WebSocketServer } = require('ws');
+const app = require('./app');
+const si = require('systeminformation');
 
-const app = express();
-// enabling CORS for some specific origins only. 
-let corsOptions = { 
-  origin : ['http://localhost:5173'], 
-} 
-
-// Use CORS middleware
-app.use(cors(corsOptions));
-
-// sample api routes for testing 
-app.get('/',(req, res) => { 
-  res.json("working") 
-});
-
-// Route to get total RAM memory
-app.get('/total', async (req, res) => {
-  try {
-    const { total } = await si.mem();
-    const totalMem = (total / (1024 ** 3)).toFixed(2)
-    app.locals.totalMem = totalMem;
-    res.json({ totalMem });
-  } catch (error) {
-    console.error('Error fetching total RAM data:', error);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-// Create an HTTP server.
+// create an HTTP server.
 const server = http.createServer(app);
-// Create a WebSocket server completely detached from the HTTP server.
+// create a WebSocket server completely detached from the HTTP server.
 const wss = new WebSocketServer({ clientTracking: false, noServer: true });
 
 server.on('upgrade', function (request, socket, head) {
@@ -47,7 +19,6 @@ server.on('upgrade', function (request, socket, head) {
 wss.on('connection', (ws) => {
   console.log(`Client connected: ${si.uuid()}`);
 
-  // Function to send RAM usage data to the client
   const sendRamUsage = async () => {
     try {
       const memData = await si.mem();
@@ -59,9 +30,7 @@ wss.on('connection', (ws) => {
 
   const sendProcesses = async () => {
     const test = await si.processes();
-    // Sort processes by memory usage
     const running = test.list.sort((a, b) => b.mem - a.mem).slice(0, 50);
-
     const data = running.map(s => ({ name: s.name, mem: (((app.locals.totalMem * s.mem) / 100) * 1024).toFixed(2), pid: s.pid })); // Convert memRss from kilobytes to MB
     ws.send(JSON.stringify({ event: 'processes', data }));
   };
@@ -76,21 +45,17 @@ wss.on('connection', (ws) => {
     }
   });
 
-  // Cleanup when client disconnects
   ws.on('close', () => {
     console.log('Client disconnected');
   });
 
-  // Handle errors
   ws.on('error', (error) => {
     console.error('WebSocket error:', error);
   });
 });
 
-//
-// Start the server.
-//
-const port = 8080;
-server.listen(port, function () {
-  console.log('Listening on http://localhost:8080');
+const PORT = process.env.PORT || 8080;
+
+server.listen(PORT, function () {
+  console.log(`Listening on port ${PORT}...`);
 });
