@@ -28,6 +28,9 @@ const MemoryChart = () => {
         color: ['#00DDFF', '#80FFA5'],
         title: {
             text: 'RAM Usage',
+            textStyle: {
+                color: '#C9C9C9',
+            }
         },
         tooltip: {
             trigger: 'axis',
@@ -39,7 +42,7 @@ const MemoryChart = () => {
               }
         },
         legend: {
-            data: ['In use', 'Available'],
+            data: [{name: 'In use', textStyle: {color: '#00DDFF'}}, {name: 'Available', textStyle: {color: '#80FFA5'}}],
         },
         xAxis: {
             type: 'time',
@@ -112,7 +115,7 @@ const MemoryChart = () => {
 
     return (
         <>
-            <div>
+            <div className='toggle-group'>
                 <button onClick={() => setTimeRange(60)}>Last 60 seconds</button>
                 <button onClick={() => setTimeRange(300)}>Last 300 seconds</button>
                 <button onClick={() => setTimeRange(Infinity)}>Total</button>
