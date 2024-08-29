@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useWebSocket } from '../context/WebSocketContext';
+import { RamUsageEvent } from '../interfaces/types';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
 import moment from 'moment';
@@ -11,7 +12,7 @@ const MemoryChart = () => {
     const { addEventListener } = useWebSocket();
 
     useEffect(() => {
-        addEventListener('ram-usage', (message) => {
+        addEventListener('ram-usage', (message: RamUsageEvent) => {
             setRamData((prevState) => {
                 const { used, free } = message.data;
                 return [ ...prevState, { used, free, time: new Date().toISOString() }];

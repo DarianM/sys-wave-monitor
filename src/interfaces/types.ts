@@ -1,4 +1,4 @@
-interface RamUsageEvent {
+export interface RamUsageEvent {
     event: 'ram-usage';
     data: {
       used: number;
