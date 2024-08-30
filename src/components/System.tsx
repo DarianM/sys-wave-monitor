@@ -10,6 +10,7 @@ import './System.css';
 const System = () => {
     const [processes, setProcesses] = useState<{ name: string, mem: number, pid: number}[]>([]);
     const [query, setQueryProcesses] = useState<string>('');
+    // @ts-ignore
     const { addEventListener } = useWebSocket();
 
     const [memory, dispatch] = useReducer((state: { sortBy: SortByEnum, sortOrder: SortOrderEnum }, action: { type: string, payload: SortByEnum }) => {

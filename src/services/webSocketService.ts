@@ -1,3 +1,5 @@
+import { MessageData } from "../interfaces/types";
+
 class WebSocketService {
   // hold a reference to the singleton
   private static instance: WebSocketService | null = null;
@@ -37,7 +39,7 @@ class WebSocketService {
   }, this.defaultInterval);
   }
 
-  sendMessage(message) {
+  sendMessage(message: { event: string }) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
@@ -45,7 +47,8 @@ class WebSocketService {
     }
   }
 
-  addMessageListener(callback) {
+  addMessageListener(callback: (message: MessageData) => void) {
+    // @ts-ignore
     this.ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       callback(data);
@@ -53,6 +56,7 @@ class WebSocketService {
   }
 
   removeMessageListener() {
+    // @ts-ignore
     this.ws.onmessage = null;
   }
 }

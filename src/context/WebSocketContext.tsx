@@ -4,12 +4,12 @@ import { MessageData } from '../interfaces/types';
 
 interface WebSocketContextValue {
   addEventListener: (event: string, handler: (message: MessageData) => void) => void;
-  sendMessage: (message: string) => void;
+  sendMessage: (message: { event: string }) => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextValue | null>(null);
 
-export const WebSocketProvider = ({ children }) => {
+export const WebSocketProvider = ({ children }: { children: React.ReactNode }) => {
   const eventHandlers: { [event: string]: ((message: MessageData) => void)[] } = {};
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export const WebSocketProvider = ({ children }) => {
     };
   }, []);
 
-  const sendMessage = (message: string) => {
+  const sendMessage = (message: { event: string }) => {
     webSocketService.sendMessage(message);
   };
 

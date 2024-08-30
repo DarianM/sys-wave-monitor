@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: frontend_container
-    image: darianm/syswave:frontend-v1.0.0
+    image: darianm/syswave:frontend-v1.1.0
     ports:
       - "5173:80"  # Map port 5173 on the host to port 80 in the container
     volumes:
@@ -20,7 +20,7 @@ services:
       context: ./serversys
       dockerfile: Dockerfile
     container_name: backend_container
-    image: darianm/syswave:backend-v1.0.0
+    image: darianm/syswave:backend-v1.1.0
     ports:
       - "8080:8080"  # Map port 8080 on the host to port 8080 in the container
     volumes:

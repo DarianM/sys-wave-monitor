@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import searchLogo from '../assets/search-svgrepo-com.svg';
 
-const FilterBar  = ({query, setQuery}) => {
+const FilterBar  = ({query, setQuery}: {query: string, setQuery: (query: string) => void}) => {
     return (
       <div
         style={{

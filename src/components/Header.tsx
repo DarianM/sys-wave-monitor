@@ -1,4 +1,5 @@
 import { memo } from 'react';
+// @ts-ignore
 import useFetch from '../hooks/useFetch/useFetch';
 
 const Header = () => {

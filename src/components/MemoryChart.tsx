@@ -9,6 +9,7 @@ const MemoryChart = () => {
     const [ramData, setRamData] = useState<{used: number, free: number, time: string}[]>([]);
     const [chartData, setChartData] = useState<{used: number, free: number, time: string}[]>([]);
     const [timeRange, setTimeRange] = useState(60); // default to last 60 seconds
+    // @ts-ignore
     const { addEventListener } = useWebSocket();
 
     useEffect(() => {
