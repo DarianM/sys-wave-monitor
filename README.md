@@ -1,7 +1,7 @@
 # SysWaveMonitor
 
 Real-time application designed to monitor and visualize the RAM usage of your personal computer in real-time. Built with React on the client-side and Node.js with Express on the server-side, uses WebSockets to provide seamless real-time updates. The project displays the total RAM usage and free RAM available in a chart, similar to a task manager, and also shows the RAM usage for the most heavy processes in a sortable and filterable table.
-![syswave](https://i.postimg.cc/fbsS5G2n/Screenshot-2024-08-30-042632.png)
+![syswave](https://i.postimg.cc/prmmpRT8/Screenshot-2024-08-30-042632.png)
 
 ## Introduction
 
