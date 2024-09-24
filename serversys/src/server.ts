@@ -1,6 +1,9 @@
-const http = require('http');
-const app = require('./app');
-const initWebSocket = require('./ws');
+// const http = require('http');
+// const app = require('./app');
+// const initWebSocket = require('./ws/socket');
+import http from 'http';
+import app from './app';
+import initWebSocket from './ws/socket';
 
 // create an HTTP server.
 const server = http.createServer(app);
