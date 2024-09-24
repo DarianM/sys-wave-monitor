@@ -1,6 +1,7 @@
-const si = require('systeminformation');
+import si from 'systeminformation';
+import { Request, Response } from 'express';
 
-async function httpGetTotalMemory(req, res) {
+async function httpGetTotalMemory(req: Request, res: Response) {
     try {
         const { total } = await si.mem();
         const totalMem = (total / (1024 ** 3)).toFixed(2);
@@ -13,6 +14,4 @@ async function httpGetTotalMemory(req, res) {
       }
 }
 
-module.exports = {
-  httpGetTotalMemory,
-};
+export default httpGetTotalMemory;

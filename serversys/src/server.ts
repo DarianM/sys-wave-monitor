@@ -1,6 +1,3 @@
-// const http = require('http');
-// const app = require('./app');
-// const initWebSocket = require('./ws/socket');
 import http from 'http';
 import app from './app';
 import initWebSocket from './ws/socket';
@@ -14,5 +11,5 @@ initWebSocket(server, app);
 const PORT = process.env.PORT || 8080;
 
 server.listen(PORT, function () {
-  console.log(`Listening on port ${PORT}...`);
+  console.log(`Server listening on port ${PORT}...`);
 });

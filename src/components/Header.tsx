@@ -4,14 +4,13 @@ import useFetch from '../hooks/useFetch/useFetch';
 
 const Header = () => {
     const data = useFetch('http://localhost:8080/memory');
-    const totalMemory = data?.totalMem;
-    console.log('data ', data);
+    const totalMem = data?.totalMem;
 
     return (
         <>
-        {totalMemory && (
+        {totalMem && (
                 <div>
-                    <h3>Total Memory: {totalMemory} GB</h3>
+                    <h3>Total Memory: {totalMem} GB</h3>
                 </div>
             )}
         </>
